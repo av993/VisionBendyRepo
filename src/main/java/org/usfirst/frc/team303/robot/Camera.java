@@ -13,14 +13,20 @@ public class Camera {
 	static final double offsetConstant = 30;
 	
 	public double getCameraDegreeOffset() {
+		
+		
+
 		int[][] visionArr = getVisionContours(0, Robot.getStringArr());
+		//System.out.println(visionArr[0][0]);
+
+		if (visionArr.length == 2) {
 
 		double centerX = (visionArr[0][1] + visionArr[1][0]) /2;
 		double width = visionArr[1][0] - visionArr[0][1];
-		double height1 = visionArr[0][4] - visionArr[0][5];
-		double height2 = visionArr[1][4] - visionArr[1][5];
+		//double height1 = visionArr[0][4] - visionArr[0][5];
+		//double height2 = visionArr[1][4] - visionArr[1][5];
 
-		System.out.println("Center X" + centerX);
+		System.out.println("Center X: " + centerX);
 		System.out.println("Width" + width);
 		SmartDashboard.putNumber("Width", width);
 		SmartDashboard.putNumber("Center X", centerX);
@@ -32,14 +38,31 @@ public class Camera {
 		double distanceY = 6040 / width;
 		double distanceX = centerXOffset * (8 / width);
 		//System.out.println(distanceX + "   &&   " + distanceY + "   &&   " + ( Math.atan(distanceX / distanceY)) );
-
 		return -Math.toDegrees(Math.atan(distanceX / distanceY));
+
+		}
+		return 0;
 	}
 
 
 
 	public int[][] getVisionContours(int position, String[] inputArr) {	
-		int[][] visionArr = convtVisionArr(inputArr);
+		
+		ArrayList<String> nextList = new ArrayList<>();
+
+		for (String cont : inputArr) {
+			if (!cont.isBlank()) {
+				nextList.add(cont);
+			}
+		}
+
+		String[] nextArr = new String[nextList.size()];
+		for (int i = 0; i < nextList.size(); i++) {
+			//System.out.println(nextList.get(i));
+			nextArr[i] = nextList.get(i);
+		}
+
+		int[][] visionArr = convtVisionArr(nextArr);
 		visionArr = sortArr(visionArr);
 		
 		return calculate(visionArr, position);
@@ -84,7 +107,10 @@ public class Camera {
 	}
 
 	public int[][] calculate(int[][] arr, int position) {
+
 		for (int i = 0; i < arr.length - 1; i++) {
+			System.out.println(isValidCont(arr[i], arr[i+1]));
+
 		 if (isValidCont(arr[i], arr[i+1])){
 			if (position == 0 || position == 1) {
 				return new int[][] {arr[i], arr[i + 1]};										
@@ -108,8 +134,11 @@ public class Camera {
 		int ul1 = cont1[0], ur1 = cont1[1], ll1 = cont1[2], lr1 = cont1[3];
 		int ul2 = cont2[0], ur2 = cont2[1], ll2 = cont2[2], lr2 = cont2[3];  
 
-		int topDiff = ur1 - ul2;
-		int botDiff = lr1 - ll2;
+		int topDiff = ul2 - ur1;
+		int botDiff = ll2 - lr1;
+		//System.out.println("TOP DIFF: " + topDiff);
+		//System.out.println("BOTTOM DIFF: " + botDiff);
+
 
 		return topDiff < botDiff; // quiets the compiler
 	}

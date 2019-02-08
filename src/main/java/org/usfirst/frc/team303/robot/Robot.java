@@ -66,7 +66,7 @@ public class Robot extends IterativeRobot {
 		widthEntry = visionTable.getEntry("Width");	
 		centerXEntry = visionTable.getEntry("Center X");
 		areaEntry = visionTable.getEntry("Area");
-		visionStringArrEntry = visionTable.getEntry("Area");
+		visionStringArrEntry = visionTable.getEntry("String Array");
 
 		width = 0.0;
 		centerX = 0.0;
