@@ -1,4 +1,5 @@
 package org.usfirst.frc.team303.robot;
+import org.usfirst.frc.team303.robot.Robot;
 
 public abstract class ActionAbstract {
 	
@@ -6,7 +7,7 @@ public abstract class ActionAbstract {
 	static final double offsetConstant = 30;
 	
 	public static double getCameraDegreeOffset() {
-		return new Camera().getCameraDegreeOffset();
+		return Robot.camera.getCameraDegreeOffset();
 	}
 
 	

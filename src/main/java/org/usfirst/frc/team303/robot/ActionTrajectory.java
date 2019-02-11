@@ -60,9 +60,9 @@ import java.io.FileWriter;
         rightFollower.configureEncoder(Robot.drivebase.getRightEncoder(), k_ticks_per_rev, k_wheel_diameter);
 
         // You must tune the PID values on the following line!
-        leftFollower.configurePIDVA(SmartDashboard.getNumber("P", 0.15), SmartDashboard.getNumber("I", 0), 0, 1 / k_max_velocity, 0);
+        leftFollower.configurePIDVA(0.15, SmartDashboard.getNumber("I", 0), 0, 1 / k_max_velocity, 0);
         // You must tune the PID values on the following line!
-        rightFollower.configurePIDVA(SmartDashboard.getNumber("P", 0.15),  SmartDashboard.getNumber("I", 0), 0, 1 / k_max_velocity, 0);
+        rightFollower.configurePIDVA(0.15,  SmartDashboard.getNumber("I", 0), 0, 1 / k_max_velocity, 0);
     }
 
     public void run() {
@@ -77,8 +77,8 @@ import java.io.FileWriter;
         rightEncoder = Robot.drivebase.getRightEncoder();
 
         if (reversed) {
-            leftEncoder = Robot.drivebase.getRightEncoder();
-            rightEncoder = Robot.drivebase.getLeftEncoder();
+            leftEncoder = -Robot.drivebase.getRightEncoder();
+            rightEncoder = -Robot.drivebase.getLeftEncoder();
         }
     
         double leftSpeed = leftFollower.calculate(Robot.drivebase.getLeftEncoder());
@@ -95,16 +95,18 @@ import java.io.FileWriter;
       
         double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
         double turn =  turningConstant * heading_difference;
-        System.out.println("\n Heading Diff: " + heading_difference);
-        SmartDashboard.putNumber("Heading Diff", heading_difference);
-        SmartDashboard.putNumber("Right Encoder", Robot.drivebase.getRightEncoder());
-        SmartDashboard.putNumber("Left Encoder", Robot.drivebase.getLeftEncoder());
+        
+        
+      //  System.out.println("\n Heading Diff: " + heading_difference);
+       // SmartDashboard.putNumber("Heading Diff", heading_difference);
+      //  SmartDashboard.putNumber("Right Encoder", Robot.drivebase.getRightEncoder());
+      //  SmartDashboard.putNumber("Left Encoder", Robot.drivebase.getLeftEncoder());
 
       // Smat("TURN: " + turn);
        // turn = 0;
 
         if (reversed) {
-            Robot.drivebase.drive(leftSpeed - turn, rightSpeed + turn);
+            Robot.drivebase.drive(rightSpeed + turn, leftSpeed - turn);
         } else {
             Robot.drivebase.drive(leftSpeed + turn, rightSpeed - turn);
         }
@@ -113,6 +115,7 @@ import java.io.FileWriter;
 
    
     public boolean isFinished() {
+        System.out.println("FINISHED");
         return (leftFollower.isFinished() || rightFollower.isFinished());
     }
 

@@ -40,6 +40,7 @@ public class Robot extends IterativeRobot {
 	private static double centerX;
 	private static double area;
 	public static Joystick left;
+	public static Camera camera;
 	public static Joystick right;
 
 	/**
@@ -54,6 +55,7 @@ public class Robot extends IterativeRobot {
 		drivebase = new Drivebase();
 		left = new Joystick(0);
 		right = new Joystick(1);
+		camera = new Camera();
 
 		navX = new NavX();
 		pdp = new PowerDistributionPanel(RobotMap.PDP);
@@ -122,7 +124,7 @@ public class Robot extends IterativeRobot {
 		centerX = centerXEntry.getDouble(0.0);
 		area = areaEntry.getDouble(0.0);
  
-		new Camera().getCameraDegreeOffset();
+		camera.getCameraDegreeOffset();
 		SmartDashboard.putNumber("Angle Offset", ActionAbstract.getCameraDegreeOffset());
         SmartDashboard.putNumber("Left Encoder", Robot.drivebase.getLeftEncoder());
         SmartDashboard.putNumber("Right Encoder", Robot.drivebase.getRightEncoder());

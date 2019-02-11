@@ -11,40 +11,60 @@ public class Camera {
 
 	static final double pixelPerDegreeConstant = 0.146875;
 	static final double offsetConstant = 30;
+	static final double FIELD_OF_VIEW_RAD = 70.42 * Math.PI /180.0;
+	static final double FOCAL_LENGTH_PIXELS = (640 / 2) / Math.tan(FIELD_OF_VIEW_RAD / 2.0);
+	public int width = 0;
 	
 	public double getCameraDegreeOffset() {
-		
-		
 
 		int[][] visionArr = getVisionContours(0, Robot.getStringArr());
 		//System.out.println(visionArr[0][0]);
 
 		if (visionArr.length == 2) {
 
-		double centerX = (visionArr[0][1] + visionArr[1][0]) /2;
-		double width = visionArr[1][0] - visionArr[0][1];
-		//double height1 = visionArr[0][4] - visionArr[0][5];
-		//double height2 = visionArr[1][4] - visionArr[1][5];
+			double centerX = (visionArr[0][1] + visionArr[1][0]) /2;
+			centerX = centerX + offsetConstant;
+			width = visionArr[1][0] - visionArr[0][1];
+			double totalWidth = visionArr[1][3] - visionArr[0][2]; //lower right - lower left 
+			double height1 = visionArr[0][5] - visionArr[0][4];
+			double height2 = visionArr[1][5] - visionArr[1][4];
 
-		System.out.println("Center X: " + centerX);
-		System.out.println("Width" + width);
-		SmartDashboard.putNumber("Width", width);
-		SmartDashboard.putNumber("Center X", centerX);
+			System.out.println("UR1: " + visionArr[0][4]);
+			System.out.println("LR1: " + visionArr[0][5]);
 
-		double centerXIdeal = 320;
-		double centerXCurrent = centerX+offsetConstant;
-		double centerXOffset = centerXIdeal-centerXCurrent;
+			double distToCenter = centerX - 320;
+			double angle = Math.atan(distToCenter / FOCAL_LENGTH_PIXELS);
+			angle = Math.toDegrees(angle);
+
+			System.out.println("Center X: " + centerX);
+			System.out.println("Width" + width);
+			
+			SmartDashboard.putNumber("Width", width);
+			SmartDashboard.putNumber("Center X", centerX);
+			SmartDashboard.putNumber("Outside Width", totalWidth);
+			SmartDashboard.putNumber("DistToCenter", distToCenter);
+			SmartDashboard.putNumber("Angle", angle);
+
+			//double centerXIdeal = 320;
+			//double centerXCurrent = centerX+offsetConstant;
+			//double centerXOffset = centerXIdeal-centerXCurrent;
 	
-		double distanceY = 6040 / width;
-		double distanceX = centerXOffset * (8 / width);
-		//System.out.println(distanceX + "   &&   " + distanceY + "   &&   " + ( Math.atan(distanceX / distanceY)) );
-		return -Math.toDegrees(Math.atan(distanceX / distanceY));
+			//double distanceY = 6040 / width;
+			//double distanceX = centerXOffset * (8 / width);
+			//SmartDashboard.putNumber("Distance", distanceY);
+
+			return angle;
 
 		}
+
 		return 0;
 	}
 
 
+
+	public double getWidth() {
+		return width;
+	}
 
 	public int[][] getVisionContours(int position, String[] inputArr) {	
 		
@@ -126,7 +146,7 @@ public class Camera {
 			}
 		 }
 		}
-		 return new int[][] {{-1,-1,-1,-1},{-1,-1,-1,-1}};
+		 return new int[][] {};
 	}
 		
 	// needs to test deciding the distance between ul and ur is less than ll,lr --> get a set of contours that are valid

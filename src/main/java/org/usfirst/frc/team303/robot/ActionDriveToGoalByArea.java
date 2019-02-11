@@ -25,49 +25,41 @@ public class ActionDriveToGoalByArea extends ActionAbstract implements Action {
 		}
 		double minPower = 0.53;
 		//double scaledCameraArea = (((-(Robot.getArea()-700))+14000)/20000); //scale the power //23000
-
-		 
 		
-		
-		double scaledCameraArea = 0.6;
+		double scaledPower = 0.6;
 
 		double offset = 0.0;
 		double tuningConstant = 0.01;
 		System.out.println(getCameraDegreeOffset());
 
-		if (timer.get() <= 1) {
-			offset = 0;
-			scaledCameraArea = 0.65;
+		if (timer.get() <= 0.75) {
+			offset = 7; //8
+			scaledPower = 0.6;
 			//System.out.println(timer.get());
 		}
-
-
-		//scaledCameraArea = scaledCameraArea > minPower ? scaledCameraArea : minPower;
-
 		double degreeOffset = getCameraDegreeOffset();
-		
-		double[] pow = driveStraightAngle(scaledCameraArea, (degreeOffset + offset), tuningConstant); //power was 0.55
+		degreeOffset += offset;
+		double[] pow = driveStraightAngle(scaledPower, (degreeOffset + offset), tuningConstant); //power was 0.55
 		Robot.drivebase.drive(pow[0], pow[1]);
-		//Robot.drivebase.drive(0.5, 0.7);
+
+		/*double turn = 0;
+		double error = Math.toRadians(degreeOffset);
+		if (error /90 <= 0.4) {
+			turn = 0.4 * Math.signum(error);
+		} else {
+			turn = (error / 90) * Math.signum(error);
+		}*/
+
+
+
+
+		//Robot.drivebase.drive.arcadeDrive(scaledPower, -turn);
 		
 	}
 
 	@Override
 	public boolean isFinished() {
-		if(firstRun) {
-			Robot.drivebase.zeroEncoder();
-			firstRun = false;
-			return false;
-		} else {
-			return (Robot.navX.collisionDetected() || Robot.getWidth() > stopWidth);
-		}	
+		return (Robot.camera.getWidth() >= stopWidth);	
 	}	
 	
-
-
-	public void beRowdy(boolean isRowdy){
-		if (isRowdy == true){
-			//stopBeingRowdy();
-		}
-	}
 }

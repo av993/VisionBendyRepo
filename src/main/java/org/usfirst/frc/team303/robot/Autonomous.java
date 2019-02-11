@@ -28,8 +28,10 @@ public class Autonomous {
 	}
 
 	public void assembleTest() {
-		arr.add(new ActionTrajectory("Left",0, 0.01, false));
-		arr.add(new ActionDriveToGoalByArea(285));
+
+		arr.add(new ActionTrajectory("Straight", 0, 0.01, false));
+
+		//arr.add(new ActionDriveToGoalByArea(270));
 
 		arr.add(new ActionWait(9999999));
 	}
