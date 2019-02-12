@@ -64,6 +64,9 @@ public class Robot extends IterativeRobot {
 		visionTable = inst.getTable("JetsonTable");	
 		SmartDashboard.putNumber("P", 0.15);
 		SmartDashboard.putNumber("I", 0);
+		SmartDashboard.putNumber("Overturn Offset", 0);
+		SmartDashboard.putNumber("Overturn Power", 0.55);
+		SmartDashboard.putNumber("Overturn Time", 0.75);
 
 		widthEntry = visionTable.getEntry("Width");	
 		centerXEntry = visionTable.getEntry("Center X");
@@ -119,6 +122,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		
 		drivebase.drive(left.getY(), right.getY());
 		width = widthEntry.getDouble(0.0);
 		centerX = centerXEntry.getDouble(0.0);

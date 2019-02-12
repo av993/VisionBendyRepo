@@ -1,6 +1,7 @@
 package org.usfirst.frc.team303.robot;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ActionDriveToGoalByArea extends ActionAbstract implements Action {
 
@@ -30,11 +31,12 @@ public class ActionDriveToGoalByArea extends ActionAbstract implements Action {
 
 		double offset = 0.0;
 		double tuningConstant = 0.01;
-		System.out.println(getCameraDegreeOffset());
-
-		if (timer.get() <= 0.75) {
-			offset = 7; //8
-			scaledPower = 0.6;
+		//System.out.println(getCameraDegreeOffset());
+		double overturnTime = SmartDashboard.getNumber("Overturn Time", 0); //8
+		double overturnPower = SmartDashboard.getNumber("Overturn Power", 0);
+		if (timer.get() <= overturnTime) {
+			offset = SmartDashboard.getNumber("Overturn Offset", 0); //8
+			scaledPower = overturnPower;
 			//System.out.println(timer.get());
 		}
 		double degreeOffset = getCameraDegreeOffset();
