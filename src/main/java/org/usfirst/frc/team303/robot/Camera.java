@@ -14,45 +14,27 @@ public class Camera {
 	static final double FIELD_OF_VIEW_RAD = 70.42 * Math.PI /180.0;
 	static final double FOCAL_LENGTH_PIXELS = (640 / 2) / Math.tan(FIELD_OF_VIEW_RAD / 2.0);
 	public int width = 0;
+	public double distance = 0;
+	public double distToCenter = 0;
+
+	public static final double A = -1.029258435778039;
+	public static final double B = 0.12131357724670491;
+	public static final double C = -0.0004412063928563716;
+	public static final double D = 7.653889638753478e-7;
 	
 	public double getCameraDegreeOffset() {
 
 		int[][] visionArr = getVisionContours(0, Robot.getStringArr());
-		//System.out.println(visionArr[0][0]);
 
 		if (visionArr.length == 2) {
 
 			double centerX = (visionArr[0][1] + visionArr[1][0]) /2;
 			centerX = centerX + offsetConstant;
 			width = visionArr[1][0] - visionArr[0][1];
-			double totalWidth = visionArr[1][3] - visionArr[0][2]; //lower right - lower left 
-			double height1 = visionArr[0][5] - visionArr[0][4];
-			double height2 = visionArr[1][5] - visionArr[1][4];
+			distToCenter = centerX - 320;
 
-			System.out.println("UR1: " + visionArr[0][4]);
-			System.out.println("LR1: " + visionArr[0][5]);
-
-			double distToCenter = centerX - 320;
-			double angle = Math.atan(distToCenter / FOCAL_LENGTH_PIXELS);
-			angle = Math.toDegrees(angle);
-
-			System.out.println("Center X: " + centerX);
-			System.out.println("Width" + width);
+			double angle = Math.toDegrees(Math.atan(distToCenter / FOCAL_LENGTH_PIXELS));
 			
-			SmartDashboard.putNumber("Width", width);
-			SmartDashboard.putNumber("Center X", centerX);
-			SmartDashboard.putNumber("Outside Width", totalWidth);
-			SmartDashboard.putNumber("DistToCenter", distToCenter);
-			SmartDashboard.putNumber("Angle", angle);
-
-			//double centerXIdeal = 320;
-			//double centerXCurrent = centerX+offsetConstant;
-			//double centerXOffset = centerXIdeal-centerXCurrent;
-	
-			//double distanceY = 6040 / width;
-			//double distanceX = centerXOffset * (8 / width);
-			//SmartDashboard.putNumber("Distance", distanceY);
-
 			return angle;
 
 		}
@@ -60,10 +42,49 @@ public class Camera {
 		return 0;
 	}
 
+	public void test() {
 
+		getCameraDegreeOffset();
+
+		double distanceToCenter = getCentDist();
+		double targetWidth = getWidth();
+
+		double distanceFromTargetInches = 4400 / targetWidth;
+		double differenceInHeading = Robot.navX.getYaw();
+		
+		SmartDashboard.putNumber("Distance To Center: ", distanceToCenter);
+
+		double inchesOffset = distanceFromTargetInches * Math.tan(Math.toRadians(differenceInHeading));
+		double pixelOffset = inchesOffset * (targetWidth / 8);
+		distanceToCenter += pixelOffset;
+
+		double offsetFromTargetInches = (distanceToCenter * 8) / width;
+
+		SmartDashboard.putNumber("Y Distance: ", distanceFromTargetInches);
+		SmartDashboard.putNumber("X Distance: ", offsetFromTargetInches);
+
+		System.out.println("Y Distance: " + distanceFromTargetInches);
+		System.out.println("X Distance: " + offsetFromTargetInches);
+		
+		//System.out.println("Width: " + targetWidth);
+		SmartDashboard.putNumber("Pixel Offset: ", pixelOffset);
+
+
+
+	}
+
+
+	public double getCentDist() {
+		return distToCenter;
+	}
 
 	public double getWidth() {
 		return width;
+	}
+
+	public double getDistance() {
+
+		return distance;
 	}
 
 	public int[][] getVisionContours(int position, String[] inputArr) {	
@@ -148,7 +169,42 @@ public class Camera {
 		}
 		 return new int[][] {};
 	}
+
+	//FOR TESTING
+	public void printOverturn() {
+		double overturn = 0.0;
+		double originalPower = 0.6;
+		double distanceToCenterX = Robot.camera.getCentDist();
+		double targetWidthPixels = Robot.camera.getWidth();
+		double distanceFromTargetInches = 6040 / targetWidthPixels;
+		double scaledPower = 0.6;
+		double offsetFromTargetInches = (distanceToCenterX * 8) / targetWidthPixels;
 		
+		double cameraOffset = Math.toDegrees(Math.atan(offsetFromTargetInches / distanceFromTargetInches));
+		//double cameraOffset = Math.toDegrees(Math.atan(distanceCent / FOCAL_LENGTH_PIXELS));
+		double originalHeading = Robot.navX.getOriginalHeading();
+
+		SmartDashboard.putNumber("Initial Degree:", cameraOffset);
+		System.out.println("Initial Degree: " + cameraOffset);
+
+		//Gives you the pixel offset if you are at an angle
+		double differenceInHeading = 0 - originalHeading;
+		double inchesOffset = distanceFromTargetInches * Math.tan(Math.toRadians(differenceInHeading));
+		double pixelOffset = inchesOffset * (targetWidthPixels / 8);
+		distanceToCenterX += pixelOffset;
+		scaledPower = originalPower;
+
+		double X = Math.abs(distToCenter + pixelOffset);
+		overturn = A + (B * X) + (C * Math.pow(X, 2)) + (D * Math.pow(X,3));
+		Math.copySign(overturn, -(distanceToCenterX + pixelOffset));
+
+		cameraOffset = cameraOffset + overturn;
+		SmartDashboard.putNumber("Overturn:", overturn);
+		SmartDashboard.putNumber("Pixel Offset:", pixelOffset);
+		SmartDashboard.putNumber("Final Degree:", cameraOffset);
+		SmartDashboard.putNumber("Heading Difference:", differenceInHeading);
+	} 
+
 	// needs to test deciding the distance between ul and ur is less than ll,lr --> get a set of contours that are valid
 	public boolean isValidCont(int[] cont1, int[] cont2){
 		int ul1 = cont1[0], ur1 = cont1[1], ll1 = cont1[2], lr1 = cont1[3];
@@ -163,136 +219,3 @@ public class Camera {
 		return topDiff < botDiff; // quiets the compiler
 	}
 }
-
-
-/*abstract
-import java.util.ArrayList;
-import java.util.Collections;
-
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import edu.wpi.cscore.AxisCamera;
-import edu.wpi.cscore.CvSink;
-import edu.wpi.cscore.CvSource;
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-public class Camera {
-
-	public Object imgLock = new Object();
-	private Thread visionThread;
-	private HatchPipeline pipeline;
-	private boolean runProcessing = false;
-	private double centerXOne = 0.0;
-	private double centerYOne = 0.0;
-	private double centerXTwo = 0.0;
-	private double centerYTwo = 0.0;
-	private double centerXAvg = 0.0;
-	private double centerYAvg = 0.0;
-	private double rectangleArea=0.0;
-	public static final int cameraResX = 320;
-	public static final int cameraResY = 240;
-	
-	public Camera() {
-		enableVisionThread(); //outputs a processed feed to the dashboard (overlays the found boiler tape)
-	}
-
-	public void enableVisionThread() {
-		pipeline = new HatchPipeline();
-		AxisCamera camera = CameraServer.getInstance().addAxisCamera("10.3.3.8");
-		camera.setResolution(cameraResX, cameraResY);
-
-		CvSink cvSink = CameraServer.getInstance().getVideo(); //capture mats from camera
-		CvSource outputStream = CameraServer.getInstance().putVideo("Stream", cameraResX, cameraResY); //send steam to CameraServer
-		Mat mat = new Mat(); //define mat in order to reuse it
-
-		runProcessing = true;
-
-		visionThread = new Thread(() -> {
-
-			while(!Thread.interrupted()) { //this should only be false when thread is disabled
-
-				if(cvSink.grabFrame(mat)==0) { //fill mat with image from camera)
-					outputStream.notifyError(cvSink.getError()); //send an error instead of the mat
-					SmartDashboard.putString("Vision State", "Acquisition Error");
-					continue; //skip to the next iteration of the thread
-				}
-
-				if(runProcessing) {		
-
-					pipeline.process(mat); //process the mat (this does not change the mat, and has an internal output to pipeline)
-					int contoursFound = pipeline.filterContoursOutput().size();
-					SmartDashboard.putString("More Vision State","Saw "+contoursFound+" Contours");
-
-					if(contoursFound>=2) {
-						//test comment
-
-						//get the contours from the vision algorithm
-						Rect rectOne = Imgproc.boundingRect(pipeline.filterContoursOutput().get(0));
-						Rect rectTwo = Imgproc.boundingRect(pipeline.filterContoursOutput().get(1));
-					
-						
-						//sort the rectangles horizontally
-						Rect rectLeft = (rectOne.x<rectTwo.x) ? rectOne : rectTwo;
-						Rect rectRight = (rectOne.x>rectTwo.x) ? rectOne : rectTwo;		
-						rectOne = rectRight;
-						rectTwo = rectLeft;
-						
-						//calculate center X and center Y pixels
-						centerXOne = rectOne.x + (rectOne.width/2); //returns the center of the bounding rectangle
-						centerYOne = rectOne.y + (rectOne.height/2); //returns the center of the bounding rectangle
-						centerXTwo = rectTwo.x + (rectTwo.width/2);
-						centerYTwo = rectTwo.y + (rectTwo.height/2);
-						
-						double width=rectTwo.x-(rectOne.x+rectOne.width);
-						double height=rectOne.y-(rectTwo.y+rectTwo.height);
-
-						rectangleArea=width*height;
-						centerYAvg = (centerYOne + centerYTwo)/2;
-						centerXAvg = (centerXOne + centerXTwo)/2;
-		
-						//draws the rectangles onto the camera image sent to the dashboard
-						Imgproc.rectangle(mat, new Point(rectOne.x, rectOne.y), new Point(rectTwo.x + rectTwo.width, rectTwo.y + rectTwo.height), new Scalar(0, 0, 255), 2); 
-						Imgproc.rectangle(mat, new Point(centerXAvg-3,centerYAvg-3), new Point(centerXAvg+3,centerYAvg+3), new Scalar(255, 0, 0), 3);
-
-						SmartDashboard.putString("Vision State", "Executed overlay!");
-					}
-
-					SmartDashboard.putNumber("Center X", centerXAvg);
-					outputStream.putFrame(mat); //give stream (and CameraServer) a new frame
-				} else {
-					outputStream.putFrame(mat); //give stream (and CameraServer) a new frame
-				}
-
-				//Timer.delay(0.09);
-			}
-
-		});	
-		visionThread.setDaemon(true);
-		visionThread.start();
-	}
-	
-	public double getArea(){
-		return rectangleArea;
-	}
-
-	public double getCenterY() {
-		return centerYAvg;
-	}
-
-	public double getCenterX() {
-		return centerXAvg;
-	}
-
-	public void disableProcessing() {
-		runProcessing = false;
-	}
-
-	public void enableProcessing() {
-		runProcessing = true;
-	}
-
-}*/

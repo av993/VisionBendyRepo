@@ -62,11 +62,11 @@ public class Robot extends IterativeRobot {
 		navX.navX.zeroYaw();
 		inst = NetworkTableInstance.getDefault();
 		visionTable = inst.getTable("JetsonTable");	
-		SmartDashboard.putNumber("P", 0.15);
-		SmartDashboard.putNumber("I", 0);
-		SmartDashboard.putNumber("Overturn Offset", 0);
-		SmartDashboard.putNumber("Overturn Power", 0.55);
-		SmartDashboard.putNumber("Overturn Time", 0.75);
+		//SmartDashboard.putNumber("P", 0.15);
+		//SmartDashboard.putNumber("I", 0);
+		//SmartDashboard.putNumber("Overturn Offset", 0);
+		//SmartDashboard.putNumber("Overturn Power", 0.55);
+		//SmartDashboard.putNumber("Overturn Time", 0.75);
 
 		widthEntry = visionTable.getEntry("Width");	
 		centerXEntry = visionTable.getEntry("Center X");
@@ -107,13 +107,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {		
-		SmartDashboard.putNumber("Angle Offset", ActionAbstract.getCameraDegreeOffset());
+		//SmartDashboard.putNumber("Angle Offset", ActionAbstract.getCameraDegreeOffset());
 
 		auto.run();
 	}
 
 	@Override
 	public void teleopInit() {
+		navX.navX.zeroYaw();
+
 		timer.reset();
 	}
 
@@ -123,35 +125,25 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		drivebase.drive(left.getY(), right.getY());
-		width = widthEntry.getDouble(0.0);
-		centerX = centerXEntry.getDouble(0.0);
-		area = areaEntry.getDouble(0.0);
+	//		drivebase.drive(left.getY(), right.getY());
  
-		camera.getCameraDegreeOffset();
-		SmartDashboard.putNumber("Angle Offset", ActionAbstract.getCameraDegreeOffset());
-        SmartDashboard.putNumber("Left Encoder", Robot.drivebase.getLeftEncoder());
-        SmartDashboard.putNumber("Right Encoder", Robot.drivebase.getRightEncoder());
+		//camera.printOverturn();
+		//SmartDashboard.putNumber("Angle Offset", ActionAbstract.getCameraDegreeOffset());
+        //SmartDashboard.putNumber("Left Encoder", Robot.drivebase.getLeftEncoder());
+        //SmartDashboard.putNumber("Right Encoder", Robot.drivebase.getRightEncoder());
 		SmartDashboard.putNumber("NavX", Robot.navX.getYaw());
 		
+		camera.test();
+	
+
 		if (left.getTrigger()) {
 			Robot.drivebase.zeroEncoder();
 			Robot.navX.zeroYaw();
 		}
 
+		//SmartDashboard.putNumber("ANGLE", camera.getCameraDegreeOffset());
 
-	}
 
-	public static double getWidth() {
-		return widthEntry.getDouble(0.0);
-	}
-
-	public static double getCenterX() {
-		return centerXEntry.getDouble(0.0);
-	}
-
-	public static double getArea() {
-		return areaEntry.getDouble(0.0);
 	}
 
 	public static String[] getStringArr() {

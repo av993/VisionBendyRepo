@@ -23,15 +23,13 @@ public class Autonomous {
 				taskNum++;
 			}
 		}
-
-		SmartDashboard.putNumber("taskNum", taskNum);
 	}
 
 	public void assembleTest() {
 
-		arr.add(new ActionTrajectory("Straight", 0, 0.01, false));
-
-		//arr.add(new ActionDriveToGoalByArea(270));
+		//arr.add(new ActionTrajectory("Straight", 0, 0.01, false));
+		//arr.add(new ActionDriveToGoalByArea(270, 0));
+		arr.add(new ActionDriveToGoalByTrajectory(-90, 0.02, 270));
 
 		arr.add(new ActionWait(9999999));
 	}

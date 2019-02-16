@@ -17,13 +17,13 @@ public class NavX { //this class controls the PID for the navX as well as the AH
 	double last_world_linear_accel_x;
 	double last_world_linear_accel_y;
     static double kCollisionThreshold_DeltaG = 0.8f; 
-	//static double kDefaultCollisionThreshold_DeltaG = 0.73f;  
+	public double originalHeading;
+
 
 	public NavX() {
 		navX = new AHRS(SPI.Port.kMXP);
-	//	navX.setPIDSourceType(PIDSourceType.kDisplacement);
-		
-		
+		//Called in RobotInit
+		originalHeading = 0;
 	}
 		
 	public void setSetpoint(double setpoint) {
@@ -31,11 +31,16 @@ public class NavX { //this class controls the PID for the navX as well as the AH
 		turnController.setSetpoint(setpoint);
 	}
 	
+	public double getOriginalHeading() {
+		return getYaw() + originalHeading;
+	}
+
 	public double getYaw() {
 		return navX.getYaw();
 	}
 
 	public void zeroYaw(){
+		originalHeading = originalHeading + getYaw();
 		navX.zeroYaw();
 	}
 
